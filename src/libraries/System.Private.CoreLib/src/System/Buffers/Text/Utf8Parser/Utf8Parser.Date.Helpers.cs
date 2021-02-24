@@ -144,7 +144,7 @@ namespace System.Buffers.Text
 
             Debug.Assert(fraction >= 0 && fraction <= Utf8Constants.MaxDateTimeFraction); // All of our callers to date parse the fraction from fixed 7-digit fields so this value is trusted.
 
-            int[] days = DateTime.IsLeapYear(year) ? s_daysToMonth366 : s_daysToMonth365;
+            int[] days = DateTime.IsLeapYear_NoYearValidation(year) ? s_daysToMonth366 : s_daysToMonth365;
             int yearMinusOne = year - 1;
             int totalDays = (yearMinusOne * 365) + (yearMinusOne / 4) - (yearMinusOne / 100) + (yearMinusOne / 400) + days[month - 1] + day - 1;
             long ticks = totalDays * TimeSpan.TicksPerDay;

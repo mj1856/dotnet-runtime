@@ -143,10 +143,9 @@ namespace System
         }
 
         [DoesNotReturn]
-        internal static void ThrowArgumentOutOfRange_Year()
+        internal static void ThrowArgumentOutOfRange_Year(int year)
         {
-            throw GetArgumentOutOfRangeException(ExceptionArgument.year,
-                                                    ExceptionResource.ArgumentOutOfRange_Year);
+            throw new ArgumentOutOfRangeException(nameof(year), year, SR.ArgumentOutOfRange_Year);
         }
 
         [DoesNotReturn]

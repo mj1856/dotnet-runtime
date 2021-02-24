@@ -459,7 +459,7 @@ namespace System
                 m = 12 + m % 12;
             }
             if (y < 1 || y > 9999) ThrowDateArithmetic(2);
-            uint[] daysTo = IsLeapYear(y) ? s_daysToMonth366 : s_daysToMonth365;
+            uint[] daysTo = IsLeapYear_NoYearValidation(y) ? s_daysToMonth366 : s_daysToMonth365;
             uint daysToMonth = daysTo[m - 1];
             int days = (int)(daysTo[m] - daysToMonth);
             if (d > days) d = days;
@@ -522,7 +522,7 @@ namespace System
             uint n = DaysToYear((uint)y);
 
             int m = month - 1, d = day - 1;
-            if (IsLeapYear(y))
+            if (IsLeapYear_NoYearValidation(y))
             {
                 n += s_daysToMonth366[m];
             }
@@ -579,7 +579,7 @@ namespace System
                 ThrowHelper.ThrowArgumentOutOfRange_BadYearMonthDay();
             }
 
-            uint[] days = IsLeapYear(year) ? s_daysToMonth366 : s_daysToMonth365;
+            uint[] days = IsLeapYear_NoYearValidation(year) ? s_daysToMonth366 : s_daysToMonth365;
             if ((uint)day > days[month] - days[month - 1])
             {
                 ThrowHelper.ThrowArgumentOutOfRange_BadYearMonthDay();
@@ -616,9 +616,9 @@ namespace System
         //
         public static int DaysInMonth(int year, int month)
         {
+            if (year < 1 || year > 9999) ThrowHelper.ThrowArgumentOutOfRange_Year(year);
             if (month < 1 || month > 12) ThrowHelper.ThrowArgumentOutOfRange_Month(month);
-            // IsLeapYear checks the year argument
-            return (IsLeapYear(year) ? DaysInMonth366 : DaysInMonth365)[month - 1];
+            return (IsLeapYear_NoYearValidation(year) ? DaysInMonth366 : DaysInMonth365)[month - 1];
         }
 
         // Converts an OLE Date to a tick count.
@@ -1070,12 +1070,28 @@ namespace System
         {
             if (year < 1 || year > 9999)
             {
-                ThrowHelper.ThrowArgumentOutOfRange_Year();
+                ThrowHelper.ThrowArgumentOutOfRange_Year(year);
             }
+
+            return IsLeapYear_NoYearValidation(year);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsLeapYear_NoYearValidation(int year)
+        {
             if ((year & 3) != 0) return false;
             if ((year & 15) == 0) return true;
             // return true/false not the test result https://github.com/dotnet/runtime/issues/4207
             return (uint)year % 25 != 0 ? true : false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsLeapYear_NoYearValidation(uint year)
+        {
+            if ((year & 3) != 0) return false;
+            if ((year & 15) == 0) return true;
+            // return true/false not the test result https://github.com/dotnet/runtime/issues/4207
+            return year % 25 != 0 ? true : false;
         }
 
         // Constructs a DateTime from a string. The string must specify a
@@ -1459,7 +1475,7 @@ namespace System
                 return false;
             }
 
-            uint[] days = IsLeapYear(year) ? s_daysToMonth366 : s_daysToMonth365;
+            uint[] days = IsLeapYear_NoYearValidation(year) ? s_daysToMonth366 : s_daysToMonth365;
             if ((uint)day > days[month] - days[month - 1])
             {
                 return false;
