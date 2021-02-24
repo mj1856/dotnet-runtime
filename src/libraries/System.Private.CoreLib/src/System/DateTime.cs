@@ -743,7 +743,7 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(fileTime), SR.ArgumentOutOfRange_FileTimeInvalid);
             }
 
-#pragma warning disable 162 // Unrechable code on Unix
+#pragma warning disable 162 // Unreachable code on Unix
             if (s_systemSupportsLeapSeconds)
             {
                 return FromFileTimeLeapSecondsAware((ulong)fileTime);
@@ -1185,8 +1185,8 @@ namespace System
         private static double TicksToOADate(long value)
         {
             if (value == 0)
-                return 0.0;  // Returns OleAut's zero'ed date value.
-            if (value < TicksPerDay) // This is a fix for VB. They want the default day to be 1/1/0001 rathar then 12/30/1899.
+                return 0.0;  // Returns OleAut's zeroed date value.
+            if (value < TicksPerDay) // This is a fix for VB. They want the default day to be 1/1/0001 rather than 12/30/1899.
                 value += DoubleDateOffset; // We could have moved this fix down but we would like to keep the bounds check.
             if (value < OADateMinAsTicks)
                 throw new OverflowException(SR.Arg_OleAutDateInvalid);
@@ -1219,7 +1219,7 @@ namespace System
             // Treats the input as universal if it is not specified
             long ticks = ((_dateData & KindLocal) != 0) ? ToUniversalTime().Ticks : Ticks;
 
-#pragma warning disable 162 // Unrechable code on Unix
+#pragma warning disable 162 // Unreachable code on Unix
             if (s_systemSupportsLeapSeconds)
             {
                 return (long)ToFileTimeLeapSecondsAware(ticks);
