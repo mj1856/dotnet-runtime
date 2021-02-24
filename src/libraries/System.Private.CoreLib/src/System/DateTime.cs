@@ -142,7 +142,7 @@ namespace System
 
         private DateTime(ulong dateData)
         {
-            this._dateData = dateData;
+            _dateData = dateData;
         }
 
         public DateTime(long ticks, DateTimeKind kind)
@@ -338,7 +338,7 @@ namespace System
                 switch (enumerator.Name)
                 {
                     case TicksField:
-                        _dateData = (ulong)Convert.ToInt64(enumerator.Value, CultureInfo.InvariantCulture);
+                        _dateData = Convert.ToUInt64(enumerator.Value, CultureInfo.InvariantCulture);
                         foundTicks = true;
                         continue;
                     case DateDataField:
@@ -652,9 +652,9 @@ namespace System
         //
         public override bool Equals([NotNullWhen(true)] object? value)
         {
-            if (value is DateTime)
+            if (value is DateTime dateTime)
             {
-                return Ticks == ((DateTime)value).Ticks;
+                return Ticks == dateTime.Ticks;
             }
             return false;
         }
