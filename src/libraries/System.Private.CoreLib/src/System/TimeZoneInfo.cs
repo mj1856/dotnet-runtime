@@ -50,8 +50,9 @@ namespace System
         // constants for TimeZoneInfo.Local and TimeZoneInfo.Utc
         private const string UtcId = "UTC";
         private const string LocalId = "Local";
+        private const string InvariantUtcStandardDisplayName = "Coordinated Universal Time";
 
-        private static readonly TimeZoneInfo s_utcTimeZone = CreateCustomTimeZone(UtcId, TimeSpan.Zero, "(UTC) Coordinated Universal Time", "Coordinated Universal Time");
+        private static readonly TimeZoneInfo s_utcTimeZone = CreateUtcTimeZone();
 
         private static CachedData s_cachedData = new CachedData();
 
@@ -1922,7 +1923,7 @@ namespace System
                         throw new InvalidTimeZoneException(SR.Argument_AdjustmentRulesNoNulls);
                     }
 
-                    if (!IsValidAdjustmentRuleOffest(baseUtcOffset, current))
+                    if (!IsValidAdjustmentRuleOffset(baseUtcOffset, current))
                     {
                         throw new InvalidTimeZoneException(SR.ArgumentOutOfRange_UtcOffsetAndDaylightDelta);
                     }
@@ -1955,7 +1956,7 @@ namespace System
         /// <summary>
         /// Helper function that performs adjustment rule validation
         /// </summary>
-        private static bool IsValidAdjustmentRuleOffest(TimeSpan baseUtcOffset, AdjustmentRule adjustmentRule)
+        private static bool IsValidAdjustmentRuleOffset(TimeSpan baseUtcOffset, AdjustmentRule adjustmentRule)
         {
             TimeSpan utcOffset = GetUtcOffset(baseUtcOffset, adjustmentRule);
             return !UtcOffsetOutOfRange(utcOffset);
