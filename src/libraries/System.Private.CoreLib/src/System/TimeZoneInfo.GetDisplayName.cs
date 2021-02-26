@@ -17,11 +17,16 @@ namespace System
 {
     public sealed partial class TimeZoneInfo
     {
-        private unsafe void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, ref string? displayName)
+        private void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, ref string? displayName)
+        {
+            GetDisplayName(_id, nameType, uiCulture, _standardDisplayName, ref displayName);
+        }
+
+        private static unsafe void GetDisplayName(string timeZoneId, Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, string? invariantDisplayName, ref string? displayName)
         {
             if (GlobalizationMode.Invariant)
             {
-                displayName = _standardDisplayName;
+                displayName = invariantDisplayName;
                 return;
             }
 
@@ -35,7 +40,7 @@ namespace System
                     }
                 },
                 uiCulture,
-                _id,
+                timeZoneId,
                 nameType,
                 out timeZoneDisplayName);
 
@@ -51,7 +56,7 @@ namespace System
                         }
                     },
                     FallbackCultureName,
-                    _id,
+                    timeZoneId,
                     nameType,
                     out timeZoneDisplayName);
             }

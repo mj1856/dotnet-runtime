@@ -975,5 +975,28 @@ namespace System
                 }
             }
         }
+
+        // Helper function to create the static UTC time zone instance
+        private static TimeZoneInfo CreateUtcTimeZone()
+        {
+            string? standardDisplayName = null, displayName = null;
+
+            using (RegistryKey? key = Registry.LocalMachine.OpenSubKey(TimeZonesRegistryHive + "\\" + UtcId, writable: false))
+            {
+                if (key != null)
+                {
+                    // Use the localized names from the registry
+                    GetLocalizedNamesByRegistryKey(key, out displayName, out standardDisplayName, out string? _);
+                }
+                else
+                {
+                    // Fallback to the invariant name
+                    standardDisplayName = InvariantUtcStandardDisplayName;
+                    displayName = $"(UTC) {InvariantUtcStandardDisplayName}";
+                }
+            }
+
+            return CreateCustomTimeZone(UtcId, TimeSpan.Zero, displayName, standardDisplayName);
+        }
     }
 }

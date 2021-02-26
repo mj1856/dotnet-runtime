@@ -5,9 +5,14 @@ namespace System
 {
     public sealed partial class TimeZoneInfo
     {
-        private unsafe void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, ref string? displayName)
+        private void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, ref string? displayName)
         {
             displayName = _standardDisplayName;
+        }
+
+        private static void GetDisplayName(string timeZoneId, Interop.Globalization.TimeZoneDisplayNameType nameType, string uiCulture, string invariantDisplayName, ref string? displayName)
+        {
+            displayName = invariantDisplayName;
         }
     }
 }
