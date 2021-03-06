@@ -81,8 +81,8 @@ namespace System.Tests
             Assert.NotNull(utc.ToString());
         }
 
-        //  Due to ICU size limitations, full daylight/standard names are not included.
-        //  name abbreviations, if available, are used instead
+        //  Due to ICU size limitations, full daylight/standard names are not included for the browser.
+        //  Name abbreviations, if available, are used instead
         public static IEnumerable<object []> Platform_TimeZoneNamesTestData()
         {
             if (PlatformDetection.IsBrowser)
@@ -96,30 +96,36 @@ namespace System.Tests
                     { s_NewfoundlandTz, "(UTC-03:30) NST", "NST", "NDT" },
                     { s_catamarcaTz, "(UTC-03:00) -03", "-03", "-02" }
                 };
+            else if (PlatformDetection.IsWindows)
+                return new TheoryData<TimeZoneInfo, string, string, string>
+                {
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPacific), "(UTC-08:00) Pacific Time (US & Canada)", "Pacific Standard Time", "Pacific Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), "(UTC+10:00) Canberra, Melbourne, Sydney", "AUS Eastern Standard Time", "AUS Eastern Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), "(UTC+08:00) Perth", "W. Australia Standard Time", "W. Australia Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strIran), "(UTC+03:30) Tehran", "Iran Standard Time", "Iran Daylight Time" },
+
+                    { s_NewfoundlandTz, "(UTC-03:30) Newfoundland", "Newfoundland Standard Time", "Newfoundland Daylight Time" },
+                    { s_catamarcaTz, "(UTC-03:00) City of Buenos Aires", "Argentina Standard Time", "Argentina Daylight Time" }
+                };
             else
                 return new TheoryData<TimeZoneInfo, string, string, string>
                 {
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPacific), "(UTC-08:00) Pacific Standard Time", "Pacific Standard Time", "Pacific Daylight Time" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), "(UTC+10:00) Australian Eastern Standard Time", "Australian Eastern Standard Time", "Australian Eastern Daylight Time" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), "(UTC+08:00) Australian Western Standard Time", "Australian Western Standard Time", "Australian Western Daylight Time" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strIran), "(UTC+03:30) +0330", "+0330", "+0430" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPacific), "(UTC-08:00) Pacific Time (Los Angeles)", "Pacific Standard Time", "Pacific Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), "(UTC+10:00) Eastern Australia Time (Sydney)", "Australian Eastern Standard Time", "Australian Eastern Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), "(UTC+08:00) Australian Western Standard Time (Perth)", "Australian Western Standard Time", "Australian Western Daylight Time" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strIran), "(UTC+03:30) Iran Time", "Iran Standard Time", "Iran Daylight Time" },
 
-                    { s_NewfoundlandTz, "(UTC-03:30) NST", "NST", "NDT" },
-                    { s_catamarcaTz, "(UTC-03:00) -03", "-03", "-02" }
-                };        
+                    { s_NewfoundlandTz, "(UTC-03:30) Newfoundland Time (St. John’s)", "Newfoundland Standard Time", "Newfoundland Daylight Time" },
+                    { s_catamarcaTz, "(UTC-03:00) Argentina Standard Time (Catamarca)", "Argentina Standard Time", "Argentina Summer Time" }
+                };
         }
 
         [Theory]
         [MemberData(nameof(Platform_TimeZoneNamesTestData))]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public static void Platform_TimeZoneNames(TimeZoneInfo tzi, string displayName, string standardName, string daylightName)
         {
-            if (PlatformDetection.IsBrowser)
-            {
-                // Console.WriteLine($"DisplayName: {tzi.DisplayName}, StandardName: {tzi.StandardName}, DaylightName: {tzi.DaylightName}");
-                Assert.Equal($"DisplayName: {tzi.DisplayName}, StandardName: {tzi.StandardName}, DaylightName: {tzi.DaylightName}",
-                            $"DisplayName: {displayName}, StandardName: {standardName}, DaylightName: {daylightName}");
-            }
+            Assert.Equal($"DisplayName: \"{displayName}\", StandardName: {standardName}\", DaylightName: {daylightName}\"",
+                         $"DisplayName: \"{tzi.DisplayName}\", StandardName: {tzi.StandardName}\", DaylightName: {tzi.DaylightName}\"");
         }
 
         [Fact]
@@ -161,7 +167,7 @@ namespace System.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
-        public static void TestYukunTZ()
+        public static void TestYukonTZ()
         {
             try
             {
@@ -190,7 +196,7 @@ namespace System.Tests
             }
             catch (TimeZoneNotFoundException)
             {
-                // Some Windows versions don't carry the complete TZ data. Ignore the tests on such versiosn.
+                // Some Windows versions don't carry the complete TZ data. Ignore the tests on such versions.
             }
        }
 
@@ -2307,7 +2313,12 @@ namespace System.Tests
         {
             foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
             {
-                if (tzi.Id != "UTC")
+                if (tzi.StandardName == TimeZoneInfo.Utc.StandardName)
+                {
+                    // UTC and all of its aliases (Etc/UTC, and others) start with just "(UTC) "
+                    Assert.StartsWith("(UTC) ", tzi.DisplayName);
+                }
+                else
                 {
                     Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
                     Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
