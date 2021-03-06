@@ -24,7 +24,6 @@ namespace System
         private const string TimeZoneDirectoryEnvironmentVariable = "TZDIR";
         private const string FallbackCultureName = "en-US";
         private const string GmtId = "GMT";
-        private static readonly CultureInfo s_FallbackCulture = CultureInfo.GetCultureInfo(FallbackCultureName);
 
         // Some time zones may give better display names using their location names rather than their generic name.
         private const string ZonesThatUseLocationName =
@@ -94,8 +93,12 @@ namespace System
             _daylightDisplayName = daylightAbbrevName;
             _displayName = _standardDisplayName;
 
+            // Determine the culture to use
+            CultureInfo uiCulture = CultureInfo.CurrentUICulture;
+            if (uiCulture.Name.Length == 0)
+                uiCulture = CultureInfo.GetCultureInfo(FallbackCultureName); // ICU doesn't work nicely with InvariantCulture
+
             // Attempt to populate the fields backing the StandardName, DaylightName, and DisplayName from globalization data.
-            CultureInfo uiCulture = GetUICultureForLocalization();
             GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCulture.Name, ref _standardDisplayName);
             GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType.DaylightSavings, uiCulture.Name, ref _daylightDisplayName);
             GetFullValueForDisplayNameField(_id, _baseUtcOffset, _standardDisplayName, uiCulture, ref _displayName);
@@ -114,14 +117,6 @@ namespace System
             }
 
             ValidateTimeZoneInfo(_id, _baseUtcOffset, _adjustmentRules, out _supportsDaylightSavingTime);
-        }
-
-        private static CultureInfo GetUICultureForLocalization()
-        {
-            CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
-            return currentUICulture.Name.Length == 0
-                ? s_FallbackCulture // ICU doesn't work nicely with InvariantCulture
-                : currentUICulture;
         }
 
         // Helper function that builds the value backing the DisplayName field from gloablization data.
@@ -1842,8 +1837,14 @@ namespace System
         {
             // Try to get localized display name from the globalization data
             string? standardDisplayName = null;
-            CultureInfo uiCulture = GetUICultureForLocalization();
-            GetDisplayName(UtcId, Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCulture.Name, InvariantUtcStandardDisplayName, ref standardDisplayName);
+
+            // Determine the culture to use
+            string uiCultureName = CultureInfo.CurrentUICulture.Name;
+            if (uiCultureName.Length == 0)
+                uiCultureName = FallbackCultureName; // ICU doesn't work nicely with InvariantCulture
+
+            // Get the standard name. For example, "Coordinated Universal Time"
+            GetDisplayName(UtcId, Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCultureName, InvariantUtcStandardDisplayName, ref standardDisplayName);
             if (standardDisplayName == null)
             {
                 // Fallback to the invariant name
