@@ -88,13 +88,13 @@ namespace System.Tests
             if (PlatformDetection.IsBrowser)
                 return new TheoryData<TimeZoneInfo, string, string, string>
                 {
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPacific), "(UTC-08:00) PST", "PST", "PDT" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), "(UTC+10:00) AEST", "AEST", "AEDT" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), "(UTC+08:00) AWST", "AWST", "AWDT" },
-                    { TimeZoneInfo.FindSystemTimeZoneById(s_strIran), "(UTC+03:30) +0330", "+0330", "+0430" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPacific), "(UTC-08:00) America/Los_Angeles", "PST", "PDT" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), "(UTC+10:00) Australia/Sydney", "AEST", "AEDT" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), "(UTC+08:00) Australia/Perth", "AWST", "AWDT" },
+                    { TimeZoneInfo.FindSystemTimeZoneById(s_strIran), "(UTC+03:30) Asia/Tehran", "+0330", "+0430" },
 
-                    { s_NewfoundlandTz, "(UTC-03:30) NST", "NST", "NDT" },
-                    { s_catamarcaTz, "(UTC-03:00) -03", "-03", "-02" }
+                    { s_NewfoundlandTz, "(UTC-03:30) America/St_Johns", "NST", "NDT" },
+                    { s_catamarcaTz, "(UTC-03:00) America/Argentina/Catamarca", "-03", "-02" }
                 };
             else if (PlatformDetection.IsWindows)
                 return new TheoryData<TimeZoneInfo, string, string, string>
@@ -2387,7 +2387,8 @@ namespace System.Tests
             TimeZoneInfo currenttz = TimeZoneInfo.FindSystemTimeZoneById(currentId);
 
             Assert.Equal(oldtz.StandardName, currenttz.StandardName);
-            Assert.Equal(oldtz.DisplayName, currenttz.DisplayName);
+            Assert.Equal(oldtz.DaylightName, currenttz.DaylightName);
+            // Note we cannot test the DisplayName, as it will contain the ID.
         }
 
         [Theory]
