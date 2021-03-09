@@ -203,11 +203,9 @@ namespace System
                 return;
             }
 
-            // Get the exemplar city name.
-            string? exemplarCityName = null;
-            GetDisplayName(timeZoneId, Interop.Globalization.TimeZoneDisplayNameType.ExemplarCity, uiCulture.Name, standardName, ref exemplarCityName);
-
-            if (exemplarCityName == null || uiCulture.CompareInfo.IndexOf(genericName, exemplarCityName, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0 && genericLocationName != null)
+            // See if we should include the exemplar city name.
+            string exemplarCityName = GetExemplarCityName(timeZoneId, uiCulture.Name);
+            if (uiCulture.CompareInfo.IndexOf(genericName, exemplarCityName, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0 && genericLocationName != null)
             {
                 // When an exemplar city is already part of the generic name,
                 // there's no need to repeat it again so just use the generic name.
@@ -239,6 +237,21 @@ namespace System
 
                 displayName = $"{baseOffsetText} {genericName} ({exemplarCityName})";
             }
+        }
+
+        private static string GetExemplarCityName(string timeZoneId, string uiCultureName)
+        {
+            // First try to get the name through the localization data.
+            string? exemplarCityName = null;
+            GetDisplayName(timeZoneId, Interop.Globalization.TimeZoneDisplayNameType.ExemplarCity, uiCultureName, null, ref exemplarCityName);
+            if (!string.IsNullOrEmpty(exemplarCityName))
+                return exemplarCityName;
+
+            // Support for getting exemplar city names was added in ICU 51.
+            // We may have an older version.  For example, in Helix we test on RHEL 7.5 which uses ICU 50.1.2.
+            // We'll fallback to using an English name generated from the time zone ID.
+            int i = timeZoneId.LastIndexOf('/');
+            return timeZoneId.Substring(i + 1).Replace('_', ' ');
         }
 
         /// <summary>
