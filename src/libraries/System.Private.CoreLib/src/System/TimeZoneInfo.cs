@@ -1961,5 +1961,13 @@ namespace System
             TimeSpan utcOffset = GetUtcOffset(baseUtcOffset, adjustmentRule);
             return !UtcOffsetOutOfRange(utcOffset);
         }
+
+        // Helper function to create the static UTC time zone instance
+        private static TimeZoneInfo CreateUtcTimeZone()
+        {
+            string standardDisplayName = GetUtcStandardDisplayName();
+            string displayName = $"(UTC) {standardDisplayName}";
+            return CreateCustomTimeZone(UtcId, TimeSpan.Zero, displayName, standardDisplayName);
+        }
     }
 }

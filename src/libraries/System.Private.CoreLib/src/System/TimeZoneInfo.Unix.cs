@@ -1832,28 +1832,23 @@ namespace System
             // when adding more versions, ensure all the logic using TZVersion is still correct
         }
 
-        // Helper function to create the static UTC time zone instance
-        private static TimeZoneInfo CreateUtcTimeZone()
+        // Helper function to get the standard display name for the UTC static time zone instance
+        private static string GetUtcStandardDisplayName()
         {
-            // Try to get localized display name from the globalization data
+            // Don't bother looking up the name for invariant or English cultures
+            CultureInfo uiCulture = CultureInfo.CurrentUICulture;
+            if (uiCulture.Name.Length == 0 || uiCulture.TwoLetterISOLanguageName == "en")
+                return InvariantUtcStandardDisplayName;
+
+            // Try to get a localized version of "Coordinated Universal Time" from the globalization data
             string? standardDisplayName = null;
+            GetDisplayName(UtcId, Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCulture.Name, InvariantUtcStandardDisplayName, ref standardDisplayName);
 
-            // Determine the culture to use
-            string uiCultureName = CultureInfo.CurrentUICulture.Name;
-            if (uiCultureName.Length == 0)
-                uiCultureName = FallbackCultureName; // ICU doesn't work nicely with InvariantCulture
-
-            // Get the standard name. For example, "Coordinated Universal Time"
-            GetDisplayName(UtcId, Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCultureName, InvariantUtcStandardDisplayName, ref standardDisplayName);
-            if (standardDisplayName == null)
-            {
-                // Fallback to the invariant name
+            // Final safety check.  Don't allow null or abbreviations
+            if (standardDisplayName == null || standardDisplayName == "GMT" || standardDisplayName == "UTC")
                 standardDisplayName = InvariantUtcStandardDisplayName;
-            }
 
-            string displayName = $"(UTC) {standardDisplayName}";
-
-            return CreateCustomTimeZone(UtcId, TimeSpan.Zero, displayName, standardDisplayName);
+            return standardDisplayName;
         }
     }
 }
