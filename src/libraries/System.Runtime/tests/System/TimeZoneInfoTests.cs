@@ -173,7 +173,8 @@ namespace System.Tests
             Assert.True(libyaLocalTime.Equals(expectResult), string.Format("Expected {0} and got {1}", expectResult, libyaLocalTime));
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public static void TestYukonTZ()
         {
             try
