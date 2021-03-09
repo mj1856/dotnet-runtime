@@ -126,9 +126,9 @@ namespace System.Tests
         public static void Platform_TimeZoneNames(TimeZoneInfo tzi, string displayName, string standardName, string daylightName)
         {
             // Edge case - Optionally allow the Unicode apostrophe to be absent in the display name.
-            if (displayName.Contains('’', StringComparison.OrdinalIgnoreCase) && !tzi.DisplayName.Contains('’', StringComparison.OrdinalIgnoreCase))
+            if (displayName.Contains('’', StringComparison.Ordinal) && !tzi.DisplayName.Contains('’', StringComparison.Ordinal))
             {
-                displayName = displayName.Replace('’', '');
+                displayName = displayName.Replace("’", "", StringComparison.Ordinal);
             }
 
             Assert.Equal($"DisplayName: \"{displayName}\", StandardName: {standardName}\", DaylightName: {daylightName}\"",
