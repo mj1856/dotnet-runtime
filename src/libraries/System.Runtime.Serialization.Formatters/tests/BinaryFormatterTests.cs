@@ -583,8 +583,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // will have English strings embedded.  Thus, we can only test them against English
             // language cultures or the invariant culture.
             if (obj is TimeZoneInfo && (
-                CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ||
-                CultureInfo.CurrentUICulture.Name.Length == 0))
+                CultureInfo.CurrentUICulture.TwoLetterISOLanguageName != "en" ||
+                CultureInfo.CurrentUICulture.Name.Length != 0))
             {
                 return;
             }
