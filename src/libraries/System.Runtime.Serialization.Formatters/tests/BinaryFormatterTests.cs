@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -573,6 +574,17 @@ namespace System.Runtime.Serialization.Formatters.Tests
             // In most cases exceptions in Core have a different layout than in Desktop,
             // therefore we are skipping the string comparison of the blobs.
             if (obj is Exception)
+            {
+                return;
+            }
+
+            // TimeZoneInfo objects have three properties (DisplayName, StandardName, DaylightName)
+            // that are localized.  Since the blobs were generated from the invariant culture, they
+            // will have English strings embedded.  Thus, we can only test them against English
+            // language cultures or the invariant culture.
+            if (obj is TimeZoneInfo && (
+                CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ||
+                CultureInfo.CurrentUICulture.Name.Length == 0))
             {
                 return;
             }
