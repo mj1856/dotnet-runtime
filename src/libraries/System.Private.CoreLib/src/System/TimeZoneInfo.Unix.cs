@@ -126,8 +126,7 @@ namespace System
             // The algorithm used below should avoid duplicating the same words while still achieving the
             // goal of providing a unique, discoverable, and intuitive name.
 
-            string? utcStandardName = null;
-            GetDisplayName(UtcId, Interop.Globalization.TimeZoneDisplayNameType.Standard, uiCulture.Name, null, ref utcStandardName);
+            string? utcStandardName = GetUtcStandardDisplayName();
             if (standardName == utcStandardName)
             {
                 // This gives the display name for UTC and all of its aliases (Etc/UTC, Universal, etc.)
@@ -147,10 +146,8 @@ namespace System
             {
                 // When we can't get a generic name, use the offset and the ID.
                 // It is not ideal, but at least it is non-ambiguous.
-                if (timeZoneId.Equals(UtcId, StringComparison.OrdinalIgnoreCase))
-                    displayName = $"(UTC) {timeZoneId}";
-                else
-                    displayName = $"{baseOffsetText} {timeZoneId}";
+                // (Note, UTC was handled already above.)
+                displayName = $"{baseOffsetText} {timeZoneId}";
                 return;
             }
 
