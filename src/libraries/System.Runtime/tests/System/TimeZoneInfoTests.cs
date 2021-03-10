@@ -2300,50 +2300,6 @@ namespace System.Tests
             }
         }
 
-        [ConditionalFact(typeof(RemoteExecutor), nameof(RemoteExecutor.IsSupported))]
-        public static void UtcDisplayNamesAreLocalized()
-        {
-            const string invariantUtcName = "Coordinated Universal Time";
-
-            if (PlatformDetection.IsWindows && IsEnglishUILanguage)
-            {
-                // On Windows, the best we can do when the OS language is English is make
-                // sure the names match what we are expecting.  Changing the UI culture
-                // won't change the underlying platform data.
-                Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.StandardName);
-                Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.DaylightName);
-                Assert.Equal($"(UTC) {invariantUtcName}", TimeZoneInfo.Utc.DisplayName);
-                return;
-            }
-
-            if (IsEnglishUILanguage)
-            {
-                // Switch to non-English and make sure names differ from the invariant name.
-                RemoteExecutor.Invoke(() =>
-                {
-                    CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
-                    TimeZoneInfo.ClearCachedData();
-
-                    Assert.NotEqual(invariantUtcName, TimeZoneInfo.Utc.StandardName);
-                    Assert.Equal(TimeZoneInfo.Utc.StandardName, TimeZoneInfo.Utc.DaylightName);
-                    Assert.Equal($"(UTC) {TimeZoneInfo.Utc.StandardName}", TimeZoneInfo.Utc.DisplayName);
-                }).Dispose();
-            }
-            else
-            {
-                // Switch to English and make sure names match the invariant name.
-                RemoteExecutor.Invoke(() =>
-                {
-                    CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
-                    TimeZoneInfo.ClearCachedData();
-
-                    Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.StandardName);
-                    Assert.Equal(TimeZoneInfo.Utc.StandardName, TimeZoneInfo.Utc.DaylightName);
-                    Assert.Equal($"(UTC) {TimeZoneInfo.Utc.StandardName}", TimeZoneInfo.Utc.DisplayName);
-                }).Dispose();
-            }
-        }
-
         [ActiveIssue("https://github.com/dotnet/runtime/issues/19794", TestPlatforms.AnyUnix)]
         [Theory]
         [MemberData(nameof(SystemTimeZonesTestData))]
