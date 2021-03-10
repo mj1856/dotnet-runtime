@@ -2263,6 +2263,85 @@ namespace System.Tests
                 }
             }
         }
+
+        [Theory]
+        [MemberData(nameof(SystemTimeZonesTestData))]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public static void TimeZoneDisplayNames_Unix(TimeZoneInfo timeZone)
+        {
+            if (timeZone.Id == TimeZoneInfo.Utc.Id || timeZone.StandardName == TimeZoneInfo.Utc.StandardName)
+            {
+                // UTC's display name is always the string "(UTC) " and the same text as the standard name.
+                Assert.Equal($"(UTC) {timeZone.StandardName}", timeZone.DisplayName);
+
+                // All aliases of UTC should have the same names as UTC itself
+                Assert.Equal(TimeZoneInfo.Utc.DisplayName, timeZone.DisplayName);
+                Assert.Equal(TimeZoneInfo.Utc.StandardName, timeZone.StandardName);
+                Assert.Equal(TimeZoneInfo.Utc.DaylightName, timeZone.DaylightName);
+            }
+            else if (PlatformDetection.IsBrowser)
+            {
+                // Browser platform doesn't have full ICU names, but uses the IANA data instead.
+
+                // The display name will be the offset plus the ID.
+                // The offset is checked separately in TimeZoneInfo_DisplayNameStartsWithOffset
+                Assert.EndsWith(" " + timeZone.Id, timeZone.DisplayName);
+
+                // Match any valid IANA time zone abbreviation, including numeric forms
+                Assert.Matches(@"^(?:[A-Z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.StandardName);
+                Assert.Matches(@"^(?:[A-Z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.DaylightName);
+            }
+            else
+            {
+                // All we can really say generically here is that they aren't empty.
+                Assert.NotEmpty(timeZone.DisplayName);
+                Assert.NotEmpty(timeZone.StandardName);
+                Assert.NotEmpty(timeZone.DaylightName);
+            }
+        }
+
+        [ConditionalFact(typeof(RemoteExecutor), nameof(RemoteExecutor.IsSupported))]
+        public static void UtcDisplayNamesAreLocalized()
+        {
+            const string invariantUtcName = "Coordinated Universal Time";
+
+            if (PlatformDetection.IsWindows && IsEnglishUILanguage)
+            {
+                // On Windows, the best we can do when the OS language is English is make
+                // sure the names match what we are expecting.  Changing the UI culture
+                // won't change the underlying platform data.
+                Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.StandardName);
+                Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.DaylightName);
+                Assert.Equal($"(UTC) {invariantUtcName}", TimeZoneInfo.Utc.DisplayName);
+                return;
+            }
+
+            if (IsEnglishUILanguage)
+            {
+                // Switch to non-English and make sure names differ from the invariant name.
+                RemoteExecutor.Invoke(() =>
+                {
+                    CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+                    TimeZoneInfo.ClearCachedData();
+
+                    Assert.NotEqual(invariantUtcName, TimeZoneInfo.Utc.StandardName);
+                    Assert.Equal(TimeZoneInfo.Utc.StandardName, TimeZoneInfo.Utc.DaylightName);
+                    Assert.Equal($"(UTC) {TimeZoneInfo.Utc.StandardName}", TimeZoneInfo.Utc.DisplayName);
+                }).Dispose();
+            }
+            else
+            {
+                // Switch to English and make sure names match the invariant name.
+                RemoteExecutor.Invoke(() =>
+                {
+                    CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+                    TimeZoneInfo.ClearCachedData();
+
+                    Assert.Equal(invariantUtcName, TimeZoneInfo.Utc.StandardName);
+                    Assert.Equal(TimeZoneInfo.Utc.StandardName, TimeZoneInfo.Utc.DaylightName);
+                    Assert.Equal($"(UTC) {TimeZoneInfo.Utc.StandardName}", TimeZoneInfo.Utc.DisplayName);
+                }).Dispose();
+            }
         }
 
         [ActiveIssue("https://github.com/dotnet/runtime/issues/19794", TestPlatforms.AnyUnix)]
