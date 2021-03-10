@@ -2508,10 +2508,11 @@ namespace System.Tests
         [InlineData("America/Jujuy")]
         [InlineData("America/Mendoza")]
         [InlineData("America/Indianapolis")]
-        public static void ChangeLocalTimeZone(string id) 
+        public static void ChangeLocalTimeZone(string id)
         {
             string originalTZ = Environment.GetEnvironmentVariable("TZ");
-            try {
+            try
+            {
                 TimeZoneInfo.ClearCachedData();
                 Environment.SetEnvironmentVariable("TZ", id);
 
@@ -2519,9 +2520,10 @@ namespace System.Tests
                 TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById(id);
 
                 Assert.Equal(tz.StandardName, localtz.StandardName);
-                Assert.Equal(tz.DisplayName, localtz.DisplayName); 
+                Assert.Equal(tz.DisplayName, localtz.DisplayName);
             }
-            finally {
+            finally
+            {
                 TimeZoneInfo.ClearCachedData();
                 Environment.SetEnvironmentVariable("TZ", originalTZ);
             }
