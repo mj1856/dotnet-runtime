@@ -2448,7 +2448,7 @@ namespace System.Tests
             }
         }
 
-        private static bool IsEnglishUILanguage => CultureInfo.CurrentUICulture.Name == "en" || CultureInfo.CurrentUICulture.Name.StartsWith("en-", StringComparison.Ordinal);
+        private static bool IsEnglishUILanguage => CultureInfo.CurrentUICulture.Name.Length == 0 || CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
 
         private static bool IsEnglishUILanguageAndRemoteExecutorSupported => IsEnglishUILanguage && RemoteExecutor.IsSupported;
 
