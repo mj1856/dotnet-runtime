@@ -125,10 +125,14 @@ namespace System.Tests
         [MemberData(nameof(Platform_TimeZoneNamesTestData))]
         public static void Platform_TimeZoneNames(TimeZoneInfo tzi, string displayName, string standardName, string daylightName)
         {
-            // Edge case - Optionally allow the Unicode apostrophe to be absent in the display name.
-            if (displayName.Contains('’', StringComparison.Ordinal) && !tzi.DisplayName.Contains('’', StringComparison.Ordinal))
+            // Edge case - Optionally allow some characters to be absent in the display name.
+            const string chars = ".’";
+            foreach (char c in chars)
             {
-                displayName = displayName.Replace("’", "", StringComparison.Ordinal);
+                if (displayName.Contains(c, StringComparison.Ordinal) && !tzi.DisplayName.Contains(c, StringComparison.Ordinal))
+                {
+                    displayName = displayName.Replace(c.ToString(), "", StringComparison.Ordinal);
+                }
             }
 
             Assert.Equal($"DisplayName: \"{displayName}\", StandardName: {standardName}\", DaylightName: {daylightName}\"",
