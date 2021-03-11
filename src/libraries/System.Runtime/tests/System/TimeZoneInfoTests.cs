@@ -2292,8 +2292,8 @@ namespace System.Tests
                 Assert.EndsWith(" " + timeZone.Id, timeZone.DisplayName);
 
                 // Match any valid IANA time zone abbreviation, including numeric forms
-                Assert.Matches(@"^(?:[A-Z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.StandardName);
-                Assert.Matches(@"^(?:[A-Z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.DaylightName);
+                Assert.Matches(@"^(?:[A-Z][A-Za-z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.StandardName);
+                Assert.Matches(@"^(?:[A-Z][A-Za-z]+|[+-]\d{2}|[+-]\d{4})$", timeZone.DaylightName);
             }
             else
             {
