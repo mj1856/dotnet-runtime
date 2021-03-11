@@ -90,7 +90,7 @@ namespace System
 
             // Use abbrev as the fallback
             _standardDisplayName = standardAbbrevName;
-            _daylightDisplayName = daylightAbbrevName;
+            _daylightDisplayName = daylightAbbrevName ?? standardAbbrevName;
             _displayName = _standardDisplayName;
 
             // Determine the culture to use
